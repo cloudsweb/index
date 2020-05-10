@@ -5,7 +5,7 @@
       loading...
     </div>
     <ul class="topics" v-if="!loading">
-      <li v-for="sub in subTopics" :key="sub">{{ sub }}</li>
+      <li v-for="sub in subTopics" :key="sub.name">{{ sub.display.get(lang) }}</li>
     </ul>
   </div>
 </template>
@@ -19,14 +19,11 @@ export default class Topic extends Vue {
   @Prop() private topicId!: string;
   lang = 'zh_CN'
   topic: topic | null = null
+  subTopics: topic[] = []
 
   async created () {
-    this.topic = await this.fetchTopic('~root')
-  }
-
-  async fetchTopic (name: string) {
-    await this.$stock.fetchTopic(name)
-    return this.$stock.topics.get(name) || null
+    this.topic = await this.$stock.fetchTopic(this.topicId)
+    this.subTopics = await Promise.all(this.topic.sub.map(this.$stock.fetchTopic))
   }
 
   get loading () {
@@ -35,10 +32,6 @@ export default class Topic extends Vue {
 
   get topicDisplay () {
     return this.topic?.display.get(this.lang) || this.topicId
-  }
-
-  get subTopics () {
-    return this.topic?.sub ?? []
   }
 }
 </script>
