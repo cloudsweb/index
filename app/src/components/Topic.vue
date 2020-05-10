@@ -5,40 +5,40 @@
       loading...
     </div>
     <ul class="topics" v-if="!loading">
-      <li v-for="sub in subtopics" :key="sub">{{ sub }}</li>
+      <li v-for="sub in subTopics" :key="sub">{{ sub }}</li>
     </ul>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import toml from 'toml'
+import { topic } from '@/store/types'
 
 @Component
 export default class Topic extends Vue {
   @Prop() private topicId!: string;
   lang = 'zh_CN'
-  loading = true;
-  display: string | null = null;
-  subtopics: string[] | null = null;
+  topic: topic | null = null
 
-  created () {
-    this.fetchData()
+  async created () {
+    this.topic = await this.fetchTopic('~root')
   }
 
-  async fetchData () {
-    const resp = await fetch('/@data/topic/meta.toml')
-    const text = await resp.text()
-    const data = toml.parse(text)
-    console.log(data)
-    this.loading = true
-    this.subtopics = data.topic['sub-topics'] || []
-    this.display = data.display[this.lang] || data.display.en_US || null
-    this.loading = false
+  async fetchTopic (name: string) {
+    await this.$stock.fetchTopic(name)
+    return this.$stock.topics.get(name) || null
+  }
+
+  get loading () {
+    return this.topic === null
   }
 
   get topicDisplay () {
-    return this.display || this.topicId
+    return this.topic?.display.get(this.lang) || this.topicId
+  }
+
+  get subTopics () {
+    return this.topic?.sub ?? []
   }
 }
 </script>
