@@ -12,15 +12,33 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import toml from 'toml'
 
 @Component
-export default class HelloWorld extends Vue {
+export default class Topic extends Vue {
   @Prop() private topicId!: string;
+  lang = 'zh_CN'
   loading = true;
+  display: string | null = null;
   subtopics: string[] | null = null;
 
+  created () {
+    this.fetchData()
+  }
+
+  async fetchData () {
+    const resp = await fetch('/@data/topic/meta.toml')
+    const text = await resp.text()
+    const data = toml.parse(text)
+    console.log(data)
+    this.loading = true
+    this.subtopics = data.topic['sub-topics'] || []
+    this.display = data.display[this.lang] || data.display.en_US || null
+    this.loading = false
+  }
+
   get topicDisplay () {
-    return this.topicId
+    return this.display || this.topicId
   }
 }
 </script>
