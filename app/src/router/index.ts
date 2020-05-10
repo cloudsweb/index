@@ -11,7 +11,7 @@ const routes: Array<RouteConfig> = [
     component: Home
   },
   {
-    path: '/topic/:topic_id*',
+    path: '/topic/:topic_id+',
     name: 'Topic',
     component: Home
   },

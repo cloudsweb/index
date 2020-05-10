@@ -6,16 +6,16 @@
     </div>
     <ul class="topics" v-if="!loading">
       <li v-for="sub in subTopics" :key="sub.name">
-        <a :href="subUrl(sub)">
+        <router-link :to="subUrl(sub)">
           {{ sub.display.get(lang) }}
-        </a>
+        </router-link>
       </li>
     </ul>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import { topic } from '@/store/types'
 
 @Component
@@ -25,7 +25,12 @@ export default class Topic extends Vue {
   topic: topic | null = null
   subTopics: topic[] = []
 
-  async created () {
+  created () {
+    this.update()
+  }
+
+  @Watch('topicId')
+  async update () {
     this.topic = await this.$stock.fetchTopic(this.topicId)
     this.subTopics = await Promise.all(this.topic.sub.map(this.$stock.fetchTopic))
   }
