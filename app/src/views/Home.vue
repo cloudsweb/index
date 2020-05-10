@@ -1,17 +1,19 @@
 <template>
   <div class="home">
-    <Topic topic-id="~root"/>
+    <Topic :topic-id="topicId"/>
   </div>
 </template>
 
-<script>
-// @ is an alias to /src
+<script lang='ts'>
+import { Component, Vue } from 'vue-property-decorator'
 import Topic from '@/components/Topic.vue'
 
-export default {
-  name: 'Home',
-  components: {
-    Topic
+@Component({
+  components: { Topic }
+})
+export default class Home extends Vue {
+  get topicId () {
+    return this.$route.params.topic_id ?? '~root'
   }
 }
 </script>

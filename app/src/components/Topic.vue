@@ -5,7 +5,11 @@
       loading...
     </div>
     <ul class="topics" v-if="!loading">
-      <li v-for="sub in subTopics" :key="sub.name">{{ sub.display.get(lang) }}</li>
+      <li v-for="sub in subTopics" :key="sub.name">
+        <a :href="subUrl(sub)">
+          {{ sub.display.get(lang) }}
+        </a>
+      </li>
     </ul>
   </div>
 </template>
@@ -32,6 +36,10 @@ export default class Topic extends Vue {
 
   get topicDisplay () {
     return this.topic?.display.get(this.lang) || this.topicId
+  }
+
+  subUrl (sub: topic) {
+    return `/topic/${sub.name}`
   }
 }
 </script>

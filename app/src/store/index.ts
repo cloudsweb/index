@@ -22,17 +22,18 @@ export class RootState extends Vuex.Module {
 
   @Action({ commit: 'addTopic' })
   async fetchTopic (name: string) {
-    console.debug('fetching topic', name)
     const topic = this.topics.get(name)
     if (topic !== undefined) {
       return topic
     }
+    console.debug('fetching topic', name)
     // TODO: normolize name
     const url = name === '~root' ? '/@data/topic/meta.toml' : `/@data/topic/${name}/meta.toml`
     const resp = await fetch(url)
     const text = await resp.text()
     const data = toml.parse(text)
-    return { name, sub: data.topic['sub-topics'] ?? [], display: new Display(data.display ?? name) }
+    const sub = (data.topic['sub-topics'] ?? []).map((n: string) => n.replace(/^@\//, name + '/'))
+    return { name, sub, display: new Display(data.display ?? name) }
   }
 }
 
