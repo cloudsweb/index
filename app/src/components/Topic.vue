@@ -1,12 +1,20 @@
 <template>
   <div class="hello">
+    <div class="topic-chain" v-if="!loading">
+      <span v-for="ancestor in ancestorTopics" :key="ancestor.name">
+        <router-link :to="topicUrl(ancestor)">
+          {{ ancestor.display.get(lang) }}
+        </router-link>
+        /
+      </span>
+    </div>
     <h1>{{ topicDisplay }}</h1>
     <div class="loading" v-if="loading">
       loading...
     </div>
     <ul class="topics" v-if="!loading">
       <li v-for="sub in subTopics" :key="sub.name">
-        <router-link :to="subUrl(sub)">
+        <router-link :to="topicUrl(sub)">
           {{ sub.display.get(lang) }}
         </router-link>
       </li>
@@ -24,6 +32,7 @@ export default class Topic extends Vue {
   lang = 'zh_CN'
   topic: topic | null = null
   subTopics: topic[] = []
+  ancestorTopics: topic[] = []
 
   created () {
     this.update()
@@ -33,6 +42,13 @@ export default class Topic extends Vue {
   async update () {
     this.topic = await this.$stock.fetchTopic(this.topicId)
     this.subTopics = await Promise.all(this.topic.sub.map(this.$stock.fetchTopic))
+    const ancestors = []
+    let current = this.topic
+    while (current.parent !== null) {
+      current = await this.$stock.fetchTopic(current.parent)
+      ancestors.push(current)
+    }
+    this.ancestorTopics = ancestors.reverse()
   }
 
   get loading () {
@@ -43,8 +59,8 @@ export default class Topic extends Vue {
     return this.topic?.display.get(this.lang) || this.topicId
   }
 
-  subUrl (sub: topic) {
-    return `/topic/${sub.name}`
+  topicUrl (topic: topic) {
+    return `/topic/${topic.name}`
   }
 }
 </script>

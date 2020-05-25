@@ -32,8 +32,9 @@ export class RootState extends Vuex.Module {
     const resp = await fetch(url)
     const text = await resp.text()
     const data = toml.parse(text)
+    const parent = name.split('/').slice(0, -1).join('/')
     const sub = (data.topic['sub-topics'] ?? []).map((n: string) => n.replace(/^@\//, name + '/'))
-    return { name, sub, display: new Display(data.display ?? name) }
+    return { name, sub, parent: parent === '' ? null : parent, display: new Display(data.display ?? name) }
   }
 }
 

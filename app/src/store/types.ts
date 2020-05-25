@@ -16,6 +16,7 @@ export class Display {
 
 export type topic = {
   name: string;
+  parent: string | null;
   sub: string[];
   display: Display;
 }
