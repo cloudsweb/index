@@ -34,7 +34,7 @@ export class RootState extends Vuex.Module {
     }
     console.debug('fetching topic', name)
     // TODO: normolize name
-    const url = name === '~root' ? '/@data/topic/meta.toml' : `/@data/topic/${name}/meta.toml`
+    const url = name === '~root' ? '/@data/topic/~meta.toml' : `/@data/topic/${name}/~meta.toml`
     const resp = await fetch(url)
     const text = await resp.text()
     const data = toml.parse(text)
