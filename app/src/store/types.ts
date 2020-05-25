@@ -14,9 +14,16 @@ export class Display {
   }
 }
 
+export type node = {
+  name: string;
+  topic: topic;
+  display: Display;
+}
+
 export type topic = {
   name: string;
   parent: string | null;
   sub: string[];
   display: Display;
+  nodes: string[];
 }

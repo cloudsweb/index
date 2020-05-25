@@ -12,19 +12,26 @@
     <div class="loading" v-if="loading">
       loading...
     </div>
-    <ul class="topics" v-if="!loading">
-      <li v-for="sub in subTopics" :key="sub.name">
-        <router-link :to="topicUrl(sub)">
-          {{ sub.display.get(lang) }}
-        </router-link>
-      </li>
-    </ul>
+    <div v-if="!loading">
+      <ul class="topics">
+        <li v-for="sub in subTopics" :key="sub.name">
+          <router-link :to="topicUrl(sub)">
+            {{ sub.display.get(lang) }}
+          </router-link>
+        </li>
+      </ul>
+      <ul class="nodes">
+        <li v-for="node in nodes" :key="node.name">
+          {{ node.display.get(lang) }}
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-import { topic } from '@/store/types'
+import { topic, node } from '@/store/types'
 
 @Component
 export default class Topic extends Vue {
@@ -33,6 +40,7 @@ export default class Topic extends Vue {
   topic: topic | null = null
   subTopics: topic[] = []
   ancestorTopics: topic[] = []
+  nodes: node[] = []
 
   created () {
     this.update()
@@ -40,10 +48,11 @@ export default class Topic extends Vue {
 
   @Watch('topicId')
   async update () {
-    this.topic = await this.$stock.fetchTopic(this.topicId)
-    this.subTopics = await Promise.all(this.topic.sub.map(this.$stock.fetchTopic))
+    let current = await this.$stock.fetchTopic(this.topicId)
+    this.topic = current
+    this.subTopics = await Promise.all(current.sub.map(this.$stock.fetchTopic))
+    this.nodes = await Promise.all(current.nodes.map((name) => this.$stock.fetchNode({ topic: current, name })))
     const ancestors = []
-    let current = this.topic
     while (current.parent !== null) {
       current = await this.$stock.fetchTopic(current.parent)
       ancestors.push(current)
